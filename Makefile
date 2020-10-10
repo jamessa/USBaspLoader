@@ -1,6 +1,6 @@
 # Name: Makefile
 # Project: USBaspLoader (updater)
-# Author: Stephan Bärwolf
+# Author: Stephan BÃ¤rwolf
 # Creation Date: 2012-09-01
 # Tabsize: 4
 # License: GNU GPL v2 (see License.txt)
