@@ -1,6 +1,6 @@
 # Name: Makefile.inc
 # Project: USBaspLoader (updater)
-# Author: Stephan B�rwolf
+# Author: Stephan Bärwolf
 # Creation Date: 2012-09-01
 # Tabsize: 4
 # License: GNU GPL v2 (see License.txt)
@@ -19,13 +19,17 @@ FLASHADDRESS = 0x0000
 DEFINES += -DCONFIG_NO__CHIP_ERASE -DCONFIG_NO__ONDEMAND_PAGEERASE -DCONFIG_NO__PRESERVE_WATCHDOG
 
 # have the bootloader always enter the programming mode
-;DEFINES += -DCONFIG_HAVE__BOOTLOADER_ALWAYSENTERPROGRAMMODE
+DEFINES += -DCONFIG_HAVE__BOOTLOADER_ALWAYSENTERPROGRAMMODE
 
 # have the bootloader exit itself after around 3 seconds (@16MHz) inactivity
-;DEFINES += -DCONFIG_BOOTLOADER_LOOPCYCLES_TIMEOUT=16 -DCONFIG_HAVE__BOOTLOADER_ABORTTIMEOUTONACT
+# defualt 16 cycles ~= 3 seconds
+DEFINES += -DCONFIG_BOOTLOADER_LOOPCYCLES_TIMEOUT=32
+
+# Don't use timeout after active, see https://github.com/baerwolf/USBaspLoader/issues/16
+;DEFINES += -DCONFIG_HAVE__BOOTLOADER_ABORTTIMEOUTONACT
 
 # save the PROG button on the layout (CAREFUL - read feature description first)
-;DEFINES += -DCONFIG_HAVE__BOOTLOADER_IGNOREPROGBUTTON
+DEFINES += -DCONFIG_HAVE__BOOTLOADER_IGNOREPROGBUTTON
 
 
 
@@ -38,7 +42,7 @@ DANGEROUS=0
 # PROGRAMMER contains AVRDUDE options to address your programmer
 # PROGRAMMER = -c pony-stk200
 # PROGRAMMER = -c usbasp
-PROGRAMMER = -c avrisp -P /dev/tty.usbmodem14501  # Ardunio as ISP
+PROGRAMMER = -c avrisp -P /dev/tty.usbmodem14101  # Ardunio as ISP
 
 #  since USBaspLoader supports HAVE_BLB11_SOFTW_LOCKBIT...
 LOCKOPT = -U lock:w:0x3f:m
