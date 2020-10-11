@@ -24,12 +24,12 @@
 #if 0
 /*
  * 29.09.2012 /  30.09.2012
- * 
+ *
  * Since cpufunc.h is not needed in this context and
  * since it is not available in all toolchains, this include
  * becomes deactivated by github issue-report.
  * (In case of trouble it remains in sourcecode for reactivation.)
- * 
+ *
  * The autor would like to thank Lena-M for reporting this
  * issue (https://github.com/baerwolf/USBaspLoader/issues/1).
  */
@@ -259,7 +259,7 @@ void __BOOTLOADERENTRY_FROMSOFTWARE__bootup_investigate_RAMEND(void) {
       [ramendlo]	"M" (((RAMEND - 1) >> 0) & 0xff),
 #endif
       [bootaddrme]	"M" (((__BOOTLOADERENTRY_FROMSOFTWARE__EXPECTEDADDRESS) >> 8) & 0xff)
-    
+
   );
 }
 #endif
@@ -301,13 +301,13 @@ static void __attribute__((naked,__noreturn__)) leaveBootloader(void);
 static void leaveBootloader(void) {
   asm  volatile  (
   "cli\n\t"
-  "sbi		%[usbddr],	%[usbminus]\n\t"  
+  "sbi		%[usbddr],	%[usbminus]\n\t"
   "cbi		%[port],	%[bit]\n\t"
   "out		%[usbintrenab],	__zero_reg__\n\t"
   "out		%[usbintrcfg],	__zero_reg__\n\t"
   "ldi		r31,		%[ivce]\n\t"
   "out		%[mygicr],	r31\n\t"
-  "out		%[mygicr],	__zero_reg__\n\t"  
+  "out		%[mygicr],	__zero_reg__\n\t"
   "rjmp		nullVector\n\t"
   :
   : [port]        "I" (_SFR_IO_ADDR(PIN_PORT(JUMPER_PORT))),
@@ -316,7 +316,7 @@ static void leaveBootloader(void) {
     [usbintrcfg]  "I" (_SFR_IO_ADDR(USB_INTR_CFG)),
     [usbddr]      "I" (_SFR_IO_ADDR(USBDDR)),
     [usbminus]    "I" (USBMINUS),
-    [mygicr]      "I" (_SFR_IO_ADDR(GICR)),	      
+    [mygicr]      "I" (_SFR_IO_ADDR(GICR)),
     [ivce]        "I" (1<<IVCE)
 );
 }
@@ -468,7 +468,7 @@ defined (__AVR_ATmega2561__)
   }else{
       /* ignore all others, return default value == 0 */
   }
-        
+
   return rval;
 }
 
@@ -543,7 +543,7 @@ uchar   isLast;
 "usbFunctionWrite_flashloop:\n\t"
 	  "subi		%[len], 2\n\t"
 	  "brlo		usbFunctionWrite_finished\n\t"
-	  
+
 #if HAVE_BLB11_SOFTW_LOCKBIT
 	  "cpi		r31, %[blsaddrhi]\n\t"			/* accelerated BLB11_SOFTW_LOCKBIT check */
 	  "brsh		usbFunctionWrite_finished\n\t"
@@ -590,7 +590,7 @@ uchar   isLast;
 // 	  "rcall	usbFunctionWrite_waitA\n\t"
 
 
-"usbFunctionWrite_skippageisfull:\n\t"	  
+"usbFunctionWrite_skippageisfull:\n\t"
 	  "adiw		r30,		0x2\n\t"
 	  "rjmp		usbFunctionWrite_flashloop\n\t"
 
@@ -766,8 +766,11 @@ static void initForUsbConnectivity(void)
 
 int __attribute__((__noreturn__)) main(void)
 {
+    _SFR_BYTE(DDRD)  |= (1 << PD6); /* set LED pin for output */
+    _SFR_BYTE(PORTD) |= (1 << PD6); /* light it up */
+
 #if ((BOOTLOADER_LOOPCYCLES_TIMEOUT) && (BOOTLOADER_CAN_EXIT))
-    uint16_t __loopscycles;
+    uint16_t __loopscycles=0;
     timeout_remaining = BOOTLOADER_LOOPCYCLES_TIMEOUT;
 #endif
     /* initialize  */
@@ -796,7 +799,7 @@ asm  volatile  (
                                                     ,
     [pin]         "I" (_SFR_IO_ADDR(PIN_PIN(JUMPER_PORT))),
     [bit]         "I" (PIN(JUMPER_PORT, JUMPER_BIT))
-#		endif    
+#		endif
 );
 #	else
 #		if ((defined(CONFIG_HAVE__BOOTLOADER_ABORTTIMEOUTONACT)) && (!(BOOTLOADER_IGNOREPROGBUTTON)) && (BOOTLOADER_LOOPCYCLES_TIMEOUT))
@@ -831,8 +834,12 @@ asm  volatile  (
 	} else {
 	  __loopscycles++;
 	  if (!(__loopscycles)) {
-	    if(timeout_remaining)	timeout_remaining--;
-	    else			stayinloader&=0xf1;
+	    if(timeout_remaining) {
+            timeout_remaining--;
+            _SFR_BYTE(PORTD) ^= (1 << PD6);   /* blink */
+        }
+	    else
+            stayinloader&=0xf1;
 	  }
 	}
 #endif
@@ -842,10 +849,10 @@ asm  volatile  (
             usbPoll();
 #if BOOTLOADER_CAN_EXIT
 #if BOOTLOADER_IGNOREPROGBUTTON
-  /* 
+  /*
    * remove the high nibble as it would be subtracted due to:
    * "(!bootLoaderConditionSimple())"
-   */ 
+   */
 #if USE_EXCESSIVE_ASSEMBLER
 asm  volatile  (
   "andi		%[sil],		0x0f\n\t"
@@ -863,7 +870,7 @@ asm  volatile  (
   "sbic		%[pin],		%[bit]\n\t"
   "subi		%[sil],		0x10\n\t"
   "rjmp		main_stayinloader_finished\n\t"
-  
+
   "main_stayinloader_smaller:\n\t"
   "cpi		%[sil],		0x2\n\t"
   "brlo		main_stayinloader_finished\n\t"
@@ -879,7 +886,7 @@ asm  volatile  (
 	if (stayinloader >= 0x10) {
 	  if (!bootLoaderConditionSimple()) {
 	    stayinloader-=0x10;
-	  } 
+	  }
 	} else {
 	  if (bootLoaderConditionSimple()) {
 	    if (stayinloader > 1) stayinloader-=2;
@@ -895,6 +902,7 @@ asm  volatile  (
         }while (1);  		/* main event loop */
 #endif
     }
+    _SFR_BYTE(PORTD) |= (1 << PD6); /* make light persistent */
     leaveBootloader();
 }
 
