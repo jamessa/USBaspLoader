@@ -70,7 +70,7 @@ these macros are defined, the boot loader usees them.
  */
 
 #ifndef USB_CFG_DMINUS_BIT
-  #define USB_CFG_DMINUS_BIT      3  /* Next to PD2 on ATmega328p */
+  #define USB_CFG_DMINUS_BIT      1  /* Next to PD2 on ATmega328P */
 #endif
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
